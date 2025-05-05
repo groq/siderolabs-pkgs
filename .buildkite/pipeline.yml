@@ -12,11 +12,22 @@ common_plugins:
 steps:
   - group: "CI"
     key: "ci"
-    if: build.branch != 'main' && build.tag == null
+    if: build.tag == null
     steps:
       - id: "build"
         label: "Build"
-        commands: "make all PUSH=true REGISTRY_AND_USERNAME=us-west1-docker.pkg.dev/prj-c-cloud-dcinfra-bc27/talos"
+        commands: "make all"
+        plugins:
+          - *hermit
+          - *gcp_auth
+          - *gcr_auth
+  - group: "Release"
+    key: "release"
+    if: build.tag != null
+    steps:
+      - id: "build_and_release"
+        label: "Build and Release"
+        commands: "make all PUSH=true"
         plugins:
           - *hermit
           - *gcp_auth
